@@ -119,12 +119,14 @@ async function run() {
     'stylelintignore',
     'stylelintrc.js'
   ];
-  dotfiles.forEach(async dotfile => {
-    await fse.move(
-      path.join(projectDir, dotfile),
-      path.join(projectDir, `.${dotfile}`)
-    );
-  });
+  await Promise.all(
+    dotfiles.map(async dotfile => {
+      return fse.move(
+        path.join(projectDir, dotfile),
+        path.join(projectDir, `.${dotfile}`)
+      );
+    })
+  );
 
   if (answers.install) {
     execSync('npm install', { stdio: 'inherit', cwd: projectDir });

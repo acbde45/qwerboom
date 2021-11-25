@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shell, ConfigProvider } from '@alifd/next';
+
 import PageNav from './components/PageNav';
 import Logo from './components/Logo';
 import Footer from './components/Footer';
@@ -32,11 +33,11 @@ interface IGetDevice {
   (width: number): 'phone' | 'tablet' | 'desktop';
 }
 export default function BasicLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
-  const getDevice: IGetDevice = (width) => {
+  const getDevice: IGetDevice = width => {
     const isPhone =
       typeof navigator !== 'undefined' &&
       navigator &&
@@ -54,7 +55,7 @@ export default function BasicLayout({
   const [device, setDevice] = useState(getDevice(NaN));
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('optimizedResize', (e) => {
+    window.addEventListener('optimizedResize', e => {
       const deviceWidth =
         (e && e.target && (e.target as Window).innerWidth) || NaN;
       setDevice(getDevice(deviceWidth));
@@ -65,7 +66,7 @@ export default function BasicLayout({
     <ConfigProvider device={device}>
       <Shell
         style={{
-          minHeight: '100vh',
+          minHeight: '100vh'
         }}
         type="brand"
         fixedHeader={false}
@@ -79,7 +80,7 @@ export default function BasicLayout({
         <Shell.Navigation
           direction="hoz"
           style={{
-            marginRight: 10,
+            marginRight: 10
           }}
         />
         <Shell.Action />

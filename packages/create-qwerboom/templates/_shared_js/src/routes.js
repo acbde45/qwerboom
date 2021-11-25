@@ -8,9 +8,9 @@ const routerConfig = [
     children: [
       {
         path: '/',
-        component: Dashboard,
-      },
-    ],
-  },
+        component: Dashboard
+      }
+    ]
+  }
 ];
 export default routerConfig;

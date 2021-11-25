@@ -8,7 +8,8 @@
   line-height: 22px;
 }
 
-.logo:visited, .logo:link {
+.logo:visited,
+.logo:link {
   color: var(--color-text1-1, #ccc);
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shell, ConfigProvider } from '@alifd/next';
+
 import PageNav from './components/PageNav';
 import Logo from './components/Logo';
 import Footer from './components/Footer';
@@ -29,8 +30,11 @@ import Footer from './components/Footer';
 })();
 
 export default function BasicLayout({ children }) {
-  const getDevice = (width) => {
-    const isPhone = typeof navigator !== 'undefined' && navigator && navigator.userAgent.match(/phone/gi);
+  const getDevice = width => {
+    const isPhone =
+      typeof navigator !== 'undefined' &&
+      navigator &&
+      navigator.userAgent.match(/phone/gi);
 
     if (width < 680 || isPhone) {
       return 'phone';
@@ -44,7 +48,7 @@ export default function BasicLayout({ children }) {
   const [device, setDevice] = useState(getDevice(NaN));
 
   if (typeof window !== 'undefined') {
-    window.addEventListener('optimizedResize', (e) => {
+    window.addEventListener('optimizedResize', e => {
       const deviceWidth = (e && e.target && e.target.innerWidth) || NaN;
       setDevice(getDevice(deviceWidth));
     });
@@ -54,18 +58,21 @@ export default function BasicLayout({ children }) {
     <ConfigProvider device={device}>
       <Shell
         style={{
-          minHeight: '100vh',
+          minHeight: '100vh'
         }}
         type="brand"
         fixedHeader={false}
       >
         <Shell.Branding>
-          <Logo image="https://img.alicdn.com/tfs/TB1.ZBecq67gK0jSZFHXXa9jVXa-904-826.png" text="Logo" />
+          <Logo
+            image="https://img.alicdn.com/tfs/TB1.ZBecq67gK0jSZFHXXa9jVXa-904-826.png"
+            text="Logo"
+          />
         </Shell.Branding>
         <Shell.Navigation
           direction="hoz"
           style={{
-            marginRight: 10,
+            marginRight: 10
           }}
         />
         <Shell.Action />

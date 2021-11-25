@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Button } from '@alifd/next';
+
 import styles from './index.module.css';
 
 const Guide = () => {
@@ -15,7 +16,7 @@ const Guide = () => {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            marginRight: 20,
+            marginRight: 20
           }}
         >
           <Button type="primary" size="large">

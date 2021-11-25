@@ -5,7 +5,7 @@ import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import meow from 'meow';
 
-import cliPkgJson from './package.json';
+// import cliPkgJson from './package.json';
 
 const help = `
   Usage:
@@ -119,7 +119,7 @@ async function run() {
     'stylelintignore',
     'stylelintrc.js'
   ];
-  dotfiles.forEach(async (dotfile) => {
+  dotfiles.forEach(async dotfile => {
     await fse.move(
       path.join(projectDir, dotfile),
       path.join(projectDir, `.${dotfile}`)

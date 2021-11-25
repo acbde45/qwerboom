@@ -1,4 +1,5 @@
-import { IRouterConfig } from 'ice';
+import type { IRouterConfig } from 'ice';
+
 import BasicLayout from '@/layouts/BasicLayout';
 import Dashboard from '@/pages/Dashboard';
 
@@ -10,9 +11,9 @@ const routerConfig: IRouterConfig[] = [
       {
         path: '/',
         exact: true,
-        component: Dashboard,
-      },
-    ],
-  },
+        component: Dashboard
+      }
+    ]
+  }
 ];
 export default routerConfig;

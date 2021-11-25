@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Button } from '@alifd/next';
+
 import styles from './index.module.css';
 
 const Guide = () => {
@@ -15,14 +16,18 @@ const Guide = () => {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            marginRight: 20,
+            marginRight: 20
           }}
         >
           <Button type="primary" size="large">
             使用文档
           </Button>
         </a>
-        <a href="https://github.com/ice-lab/icejs" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://github.com/ice-lab/icejs"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button type="secondary" size="large">
             GitHub
           </Button>

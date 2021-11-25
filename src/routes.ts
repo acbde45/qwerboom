@@ -1,11 +1,12 @@
-import { IRouterConfig } from 'ice';
+import type { IRouterConfig } from 'ice';
+
 import Home from '@/pages/Home';
 
 const routerConfig: IRouterConfig[] = [
   {
     path: '/',
-    component: Home,
-  },
+    component: Home
+  }
 ];
 
 export default routerConfig;

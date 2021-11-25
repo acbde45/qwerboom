@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'ice';
 import { Nav } from '@alifd/next';
+
 import { asideMenuConfig } from '../../menuConfig';
 
 const { SubNav } = Nav;
@@ -10,7 +11,7 @@ const NavItem = Nav.Item; // mock the auth object
 
 const AUTH_CONFIG = {
   admin: true,
-  guest: false,
+  guest: false
 };
 
 function getNavMenuItems(menusData, initIndex, auth) {
@@ -19,12 +20,12 @@ function getNavMenuItems(menusData, initIndex, auth) {
   }
 
   return menusData
-    .filter((item) => {
+    .filter(item => {
       let roleAuth = true; // if item.roles is [] or undefined, roleAuth is true
 
       if (auth && item.auth && item.auth instanceof Array) {
         if (item.auth.length) {
-          roleAuth = item.auth.some((key) => auth[key]);
+          roleAuth = item.auth.some(key => auth[key]);
         }
       }
 
@@ -36,7 +37,7 @@ function getNavMenuItems(menusData, initIndex, auth) {
 }
 
 function getSubMenuOrItem(item, index, auth) {
-  if (item.children && item.children.some((child) => child.name)) {
+  if (item.children && item.children.some(child => child.name)) {
     const childrenItems = getNavMenuItems(item.children, index, auth);
 
     if (childrenItems && childrenItems.length > 0) {
@@ -65,13 +66,15 @@ const Navigation = (props, context) => {
   const { pathname } = location;
   const { isCollapse } = context;
   useEffect(() => {
-    const curSubNav = asideMenuConfig.find((menuConfig) => {
+    const curSubNav = asideMenuConfig.find(menuConfig => {
       return menuConfig.children && checkChildPathExists(menuConfig);
     });
 
     function checkChildPathExists(menuConfig) {
-      return menuConfig.children.some((child) => {
-        return child.children ? checkChildPathExists(child) : child.path === pathname;
+      return menuConfig.children.some(child => {
+        return child.children
+          ? checkChildPathExists(child)
+          : child.path === pathname;
       });
     }
 
@@ -90,7 +93,7 @@ const Navigation = (props, context) => {
       iconOnly={isCollapse}
       hasArrow={false}
       mode={isCollapse ? 'popup' : 'inline'}
-      onOpen={(keys) => {
+      onOpen={keys => {
         // @ts-ignore
         setOpenKeys(keys);
       }}
@@ -101,7 +104,7 @@ const Navigation = (props, context) => {
 };
 
 Navigation.contextTypes = {
-  isCollapse: PropTypes.bool,
+  isCollapse: PropTypes.bool
 };
 const PageNav = withRouter(Navigation);
 export default PageNav;

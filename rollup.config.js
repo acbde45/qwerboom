@@ -1,13 +1,8 @@
-import path from "path";
-import babel from "@rollup/plugin-babel";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import copy from "rollup-plugin-copy";
+import babel from '@rollup/plugin-babel';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import copy from 'rollup-plugin-copy';
 
-function isBareModuleId(id) {
-  return !id.startsWith(".") && !path.isAbsolute(id);
-}
-
-let executableBanner = "#!/usr/bin/env node \n";
+let executableBanner = '#!/usr/bin/env node \n';
 
 function createBanner(libraryName, version) {
   return `/**
@@ -28,8 +23,8 @@ function getVersion(sourceDir) {
 
 /** @type {import("rollup").RollupOptions[]} */
 function createQwerboom() {
-  let SOURCE_DIR = "packages/create-qwerboom";
-  let OUTPUT_DIR = "build/node_modules/create-qwerboom";
+  let SOURCE_DIR = 'packages/create-qwerboom';
+  let OUTPUT_DIR = 'build/node_modules/create-qwerboom';
   let version = getVersion(SOURCE_DIR);
 
   return [
@@ -39,17 +34,17 @@ function createQwerboom() {
       },
       input: `${SOURCE_DIR}/cli.ts`,
       output: {
-        format: "cjs",
+        format: 'cjs',
         dir: OUTPUT_DIR,
-        banner: executableBanner + createBanner("create-qwerboom", version)
+        banner: executableBanner + createBanner('create-qwerboom', version)
       },
       plugins: [
         babel({
-          babelHelpers: "bundled",
+          babelHelpers: 'bundled',
           exclude: /node_modules/,
-          extensions: [".ts"]
+          extensions: ['.ts']
         }),
-        nodeResolve({ extensions: [".ts"] }),
+        nodeResolve({ extensions: ['.ts'] }),
         copy({
           targets: [
             { src: `LICENSE.md`, dest: OUTPUT_DIR },
@@ -67,9 +62,7 @@ function createQwerboom() {
 }
 
 export default function rollup(options) {
-  let builds = [
-    ...createQwerboom(options),
-  ];
+  let builds = [...createQwerboom(options)];
 
   return builds;
 }

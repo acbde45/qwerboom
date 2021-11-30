@@ -19,7 +19,7 @@ const keys = {
 
 const createQwerboom = path.resolve(
   __dirname,
-  '../../../build/node_modules/create-qwerboom/cli.js'
+  '../../../build/node_modules/create-qwerboom/bin/cli.js'
 );
 
 describe('create-qwerboom cli', () => {
@@ -64,15 +64,15 @@ describe('create-qwerboom cli', () => {
         case 3:
           // TypeScript or JavaScript?
           expect(getPromptChoices(prompt)).toEqual([
+            'JavaScript',
             'TypeScript',
-            'JavaScript'
           ]);
           cli.stdin.write(keys.enter);
           break;
 
         case 4:
           expect(prompt).toEqual(
-            '? Do you want me to run `npm install`? (Y/n)'
+            '? Do you want me to run `npm install`? (y/N)'
           );
           cli.stdin.write('n');
 

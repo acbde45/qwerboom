@@ -1,8 +1,5 @@
-import { runApp } from 'ice';
-
-const appConfig = {
-  app: {
-    rootId: 'ice-container'
-  }
-};
-runApp(appConfig);
+export default function App() {
+  return (
+    <div>Successfully</div>
+  );
+}

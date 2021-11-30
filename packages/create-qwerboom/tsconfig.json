@@ -12,7 +12,8 @@
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
 
-    "outDir": "../../build/node_modules/create-qwerboom",
-    "rootDir": "."
+    "outDir": "../../build/node_modules/create-qwerboom/lib",
+    "baseUrl": "./",
+    "rootDir": "src",
   }
 }

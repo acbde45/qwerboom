@@ -4,8 +4,7 @@ import chalkAnimation from 'chalk-animation';
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import meow from 'meow';
-
-// import cliPkgJson from './package.json';
+import { isNil } from 'lodash';
 
 const help = `
   Usage:
@@ -17,16 +16,6 @@ const help = `
     --help, -h          Show this help message
     --version, -v       Show the version of this script
 `;
-
-run().then(
-  () => {
-    process.exit(0);
-  },
-  error => {
-    console.error(error);
-    process.exit(1);
-  }
-);
 
 async function run() {
   let { input, flags, showHelp, showVersion } = meow(help, {
@@ -74,15 +63,16 @@ async function run() {
       type: 'list',
       message: 'TypeScript or JavaScript?',
       choices: [
+        { name: 'JavaScript', value: 'js' },
         { name: 'TypeScript', value: 'ts' },
-        { name: 'JavaScript', value: 'js' }
-      ]
+      ],
+      default: 'js',
     },
     {
       name: 'install',
       type: 'confirm',
       message: 'Do you want me to run `npm install`?',
-      default: true
+      default: false
     }
   ]);
 
@@ -110,22 +100,33 @@ async function run() {
 
   // rename dotfiles
   const dotfiles = [
-    'editorconfig',
-    'eslintignore',
-    'eslintrc.js',
-    'gitignore',
-    'prettierrc.js',
-    'prettierignore',
-    'stylelintignore',
-    'stylelintrc.js'
+    '_editorconfig',
+    '_eslintignore',
+    '_eslintrc.js',
+    '_gitignore',
+    '_prettierrc.js',
+    '_prettierignore',
+    '_stylelintignore',
+    '_stylelintrc.js',
+    '_tsconfig.json',
+    '_jsconfig.json'
   ];
   await Promise.all(
-    dotfiles.map(async dotfile => {
-      return fse.move(
-        path.join(projectDir, dotfile),
-        path.join(projectDir, `.${dotfile}`)
-      );
-    })
+    dotfiles
+      .map(async (dotfile, index) => {
+        const filePath = path.join(projectDir, dotfile);
+        if (fse.existsSync(filePath)) {
+          const renamedFile =
+            index < dotfiles.length - 2
+              ? dotfile.replace('_', '.')
+              : dotfile.replace('_', '');
+          return fse.move(
+            path.join(projectDir, dotfile),
+            path.join(projectDir, renamedFile)
+          );
+        }
+      })
+      .filter(v => !isNil(v))
   );
 
   if (answers.install) {
@@ -144,4 +145,13 @@ async function run() {
       )}" and check the README for development and deploy instructions!`
     );
   }
+}
+
+export default async function create() {
+  run().then(() => {
+    process.exit(0);
+  }).catch(error => {
+    console.error(error);
+    process.exit(1);
+  });
 }

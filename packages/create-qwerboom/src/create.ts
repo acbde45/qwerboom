@@ -4,7 +4,6 @@ import chalkAnimation from 'chalk-animation';
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import meow from 'meow';
-import { isNil } from 'lodash';
 
 const help = `
   Usage:
@@ -17,7 +16,11 @@ const help = `
     --version, -v       Show the version of this script
 `;
 
-async function run() {
+function isNil(val: unknown): val is undefined | null {
+  return val === undefined || val === null;
+}
+
+export async function run() {
   let { input, flags, showHelp, showVersion } = meow(help, {
     flags: {
       help: { type: 'boolean', default: false, alias: 'h' },
@@ -145,13 +148,4 @@ async function run() {
       )}" and check the README for development and deploy instructions!`
     );
   }
-}
-
-export default async function create() {
-  run().then(() => {
-    process.exit(0);
-  }).catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
 }

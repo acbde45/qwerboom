@@ -19,7 +19,7 @@ const keys = {
 
 const createQwerboom = path.resolve(
   __dirname,
-  '../../../build/node_modules/create-qwerboom/bin/cli.js'
+  '../bin/cli.js'
 );
 
 describe('create-qwerboom cli', () => {

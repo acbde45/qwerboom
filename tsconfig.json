@@ -1,4 +1,7 @@
 {
   "files": [],
-  "references": [{ "path": "packages/create-qwerboom" }]
+  "references": [
+    { "path": "packages/create-qwerboom" },
+    { "path": "packages/qwerboom" },
+  ]
 }

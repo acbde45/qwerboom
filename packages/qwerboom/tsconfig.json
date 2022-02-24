@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.settings.json",
-  "exclude": ["bin", "__tests__"],
+  "exclude": ["bin", "lib", "__tests__"],
   "compilerOptions": {
     "baseUrl": "./",
     "rootDir": "src",

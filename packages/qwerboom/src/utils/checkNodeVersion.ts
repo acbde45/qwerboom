@@ -7,7 +7,7 @@ export = function checkNodeVersion(requireNodeVersion: string): void {
     log.error('ENV', `You are using Node ${process.version}`);
     log.error(
       'ENV',
-      `qwerboom requires Node ${requireNodeVersion}, please update Node.`,
+      `build-scripts requires Node ${requireNodeVersion}, please update Node.`,
     );
     process.exit(1);
   }

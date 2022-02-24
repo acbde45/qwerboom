@@ -1,0 +1,14 @@
+{
+  "name": "react-app-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "qwerboom build"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "qwerboom": "^1.0.0",
+    "webpack": "^5.52.0",
+    "build-plugin-react-demo": "^1.0.0"
+  }
+}

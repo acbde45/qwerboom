@@ -6,7 +6,7 @@
   "command": {
     "publish": {
       "message": "chore(release): publish",
-      "registry": "http://localhost:8081/repository/mynpm-group/"
+      "registry": "http://localhost:8081/repository/mynpm-hosted/"
     }
   }
 }

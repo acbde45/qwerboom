@@ -1,6 +1,9 @@
 {
   "private": true,
   "name": "qwerboom-monorepo",
+  "publishConfig": {
+    "registry": "http://localhost:8081/repository/mynpm-hosted/"
+  },
   "scripts": {
     "clean": "rimraf packages/*/lib",
     "watch": "ts-node ./scripts/watch.ts",

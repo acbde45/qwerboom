@@ -1,6 +1,6 @@
 {
   "name": "create-qwerboom",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.1",
   "description": "Create a new Qwerboom app",
   "main": "lib/create.js",
   "bin": {

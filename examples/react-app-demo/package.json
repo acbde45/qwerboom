@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "qwerboom start",
     "build": "qwerboom build"
   },
-  "license": "ISC",
   "devDependencies": {
-    "qwerboom": "^1.0.0",
-    "webpack": "^5.52.0",
-    "build-plugin-react-demo": "^1.0.0"
+    "qwerboom-plugin-react-demo": "*",
+    "webpack": "^5.69.1",
+    "qwerboom": "*",
+    "webpack-chain": "^6.5.1"
   }
 }

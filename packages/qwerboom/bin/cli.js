@@ -10,7 +10,9 @@ const test = require('./test');
 (async () => {
   console.log(packageInfo.name, packageInfo.version);
   // finish check before run command
-  checkNodeVersion(packageInfo.engines.node);
+  if (packageInfo?.engines?.node) {
+    checkNodeVersion(packageInfo.engines.node);
+  }
 
   program.version(packageInfo.version).usage('<command> [options]');
 

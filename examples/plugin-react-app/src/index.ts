@@ -1,5 +1,5 @@
-import path from 'path';
-import Config from 'webpack-chain';
+import * as path from 'path';
+import * as Config from 'webpack-chain';
 
 const plugin = ({ context, registerTask, onGetWebpackConfig, registerUserConfig }) => {
   const { rootDir } = context;

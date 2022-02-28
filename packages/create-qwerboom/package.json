@@ -1,6 +1,6 @@
 {
   "name": "create-qwerboom",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-",
   "description": "Create a new Qwerboom app",
   "main": "lib/create.js",
   "bin": {
@@ -9,13 +9,10 @@
   "dependencies": {
     "chalk-animation": "^1.6.0",
     "commander": "^8.3.0",
-    "execa": "^6.0.0",
-    "inquirer": "^8.2.0",
     "meow": "^7.1.1",
     "semver": "^7.3.5"
   },
   "devDependencies": {
-    "@types/chalk-animation": "^1.6.1",
-    "@types/inquirer": "^8.1.3"
+    "@types/chalk-animation": "^1.6.1"
   }
 }

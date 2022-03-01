@@ -5,6 +5,14 @@ import fse from 'fs-extra';
 import inquirer from 'inquirer';
 import meow from 'meow';
 
+interface Answers {
+  buildTools: 'webpack' | 'vite';
+  framework: 'React' | 'vue';
+  vueVersion: '2' | '3';
+  lang: 'ts' | 'js';
+  install: boolean;
+}
+
 const help = `
   Usage:
     $ npx create-qwerboom [flags...] [<dir>]
@@ -35,9 +43,7 @@ export async function run() {
   await new Promise(res => setTimeout(res, 1500));
   anim.stop();
 
-  console.log(
-    "💿 Welcome to Qwerboom! Let's get you set up with a new project."
-  );
+  console.log("💿 Welcome to Qwerboom! Let's get you set up with a new project.");
   console.log();
 
   // Figure out the app directory
@@ -57,19 +63,47 @@ export async function run() {
         ).dir
   );
 
-  let answers = await inquirer.prompt<{
-    lang: 'ts' | 'js';
-    install: boolean;
-  }>([
+  let answers = await inquirer.prompt<Answers>([
+    {
+      name: 'buildTools',
+      type: 'list',
+      message: 'Webpack or Vite?',
+      choices: [
+        { name: 'Webpack', value: 'webpack' },
+        { name: 'Vite', value: 'vite' }
+      ],
+      default: 'webpack'
+    },
+    {
+      name: 'framework',
+      type: 'list',
+      message: 'React or Vue?',
+      choices: [
+        { name: 'React', value: 'react' },
+        { name: 'Vue', value: 'vue' }
+      ],
+      default: 'react'
+    },
+    {
+      name: 'vueVersion',
+      type: 'list',
+      message: 'Which version of Vue?',
+      when: ({ framework }) => framework === 'vue',
+      choices: [
+        { name: 'v2', value: 'react' },
+        { name: 'v3', value: 'vue' }
+      ],
+      default: '2'
+    },
     {
       name: 'lang',
       type: 'list',
       message: 'TypeScript or JavaScript?',
       choices: [
         { name: 'JavaScript', value: 'js' },
-        { name: 'TypeScript', value: 'ts' },
+        { name: 'TypeScript', value: 'ts' }
       ],
-      default: 'js',
+      default: 'js'
     },
     {
       name: 'install',
@@ -84,9 +118,7 @@ export async function run() {
   let projectDirIsCurrentDir = relativeProjectDir === '';
   if (!projectDirIsCurrentDir) {
     if (fse.existsSync(projectDir)) {
-      console.log(
-        `️🚨 Oops, "${relativeProjectDir}" already exists. Please try again with a different directory.`
-      );
+      console.log(`️🚨 Oops, "${relativeProjectDir}" already exists. Please try again with a different directory.`);
       process.exit(1);
     } else {
       await fse.mkdir(projectDir);
@@ -96,8 +128,10 @@ export async function run() {
   // copy the shared template
   let sharedTemplate = path.resolve(
     __dirname,
-    'templates',
-    `_shared_${answers.lang}`
+    '../templates',
+    answers.framework === 'vue'
+      ? `${answers.buildTools}_${answers.framework}_${answers.lang}_${answers.vueVersion}`
+      : `${answers.buildTools}_${answers.framework}_${answers.lang}`
   );
   await fse.copy(sharedTemplate, projectDir);
 
@@ -119,14 +153,8 @@ export async function run() {
       .map(async (dotfile, index) => {
         const filePath = path.join(projectDir, dotfile);
         if (fse.existsSync(filePath)) {
-          const renamedFile =
-            index < dotfiles.length - 2
-              ? dotfile.replace('_', '.')
-              : dotfile.replace('_', '');
-          return fse.move(
-            path.join(projectDir, dotfile),
-            path.join(projectDir, renamedFile)
-          );
+          const renamedFile = index < dotfiles.length - 2 ? dotfile.replace('_', '.') : dotfile.replace('_', '');
+          return fse.move(path.join(projectDir, dotfile), path.join(projectDir, renamedFile));
         }
       })
       .filter(v => !isNil(v))
@@ -137,9 +165,7 @@ export async function run() {
   }
 
   if (projectDirIsCurrentDir) {
-    console.log(
-      `💿 That's it! Check the README for development and deploy instructions!`
-    );
+    console.log(`💿 That's it! Check the README for development and deploy instructions!`);
   } else {
     console.log(
       `💿 That's it! \`cd\` into "${path.relative(

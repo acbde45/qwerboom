@@ -80,11 +80,13 @@ importers:
       chalk-animation: ^1.6.0
       commander: ^8.3.0
       meow: ^7.1.1
+      rxjs: ^7.5.4
       semver: ^7.3.5
     dependencies:
       chalk-animation: 1.6.0
       commander: 8.3.0
       meow: 7.1.1
+      rxjs: 7.5.4
       semver: 7.3.5
     devDependencies:
       '@types/chalk-animation': 1.6.1

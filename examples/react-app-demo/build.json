@@ -1,5 +1,0 @@
-{
-  "entry": "./index.js",
-  "outputDir": "dist",
-  "plugins": ["qwerboom-plugin-react-demo"]
-}

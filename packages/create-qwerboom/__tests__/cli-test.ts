@@ -17,18 +17,13 @@ const keys = {
   space: '\x20'
 };
 
-const createQwerboom = path.resolve(
-  __dirname,
-  '../bin/cli.js'
-);
+const createQwerboom = path.resolve(__dirname, '../bin/cli.js');
 
 describe('create-qwerboom cli', () => {
   beforeAll(() => {
     if (!fs.existsSync(createQwerboom)) {
       // TODO: Consider runnuing the build here instead of throwing
-      throw new Error(
-        `Cannot run Qwerboom CLI tests without building Qwerboom`
-      );
+      throw new Error(`Cannot run Qwerboom CLI tests without building Qwerboom`);
     }
   });
 
@@ -39,11 +34,7 @@ describe('create-qwerboom cli', () => {
 
     cli.stdout.on('data', async data => {
       let prompt = cleanPrompt(data);
-      if (
-        !prompt ||
-        prompt === 'Q W E R B O O M' ||
-        isSamePrompt(prompt, previousPrompt)
-      ) {
+      if (!prompt || prompt === 'Q W E R B O O M' || isSamePrompt(prompt, previousPrompt)) {
         return;
       }
 
@@ -51,29 +42,26 @@ describe('create-qwerboom cli', () => {
 
       switch (promptCount) {
         case 1:
-          expect(prompt).toEqual(
-            "💿 Welcome to Qwerboom! Let's get you set up with a new project."
-          );
+          expect(prompt).toEqual("💿 Welcome to Qwerboom! Let's get you set up with a new project.");
           break;
         case 2:
-          expect(prompt).toEqual(
-            `? Where would you like to create your app? (./${DEFAULT_APP_NAME})`
-          );
+          expect(prompt).toEqual(`? Where would you like to create your app? (./${DEFAULT_APP_NAME})`);
           cli.stdin.write(keys.enter);
           break;
         case 3:
-          // TypeScript or JavaScript?
-          expect(getPromptChoices(prompt)).toEqual([
-            'JavaScript',
-            'TypeScript',
-          ]);
+          expect(getPromptChoices(prompt)).toEqual(['Webpack', 'Vite']);
           cli.stdin.write(keys.enter);
           break;
-
         case 4:
-          expect(prompt).toEqual(
-            '? Do you want me to run `npm install`? (y/N)'
-          );
+          expect(getPromptChoices(prompt)).toEqual(['React', 'Vue']);
+          cli.stdin.write(keys.enter);
+          break;
+        case 5:
+          expect(getPromptChoices(prompt)).toEqual(['JavaScript', 'TypeScript']);
+          cli.stdin.write(keys.enter);
+          break;
+        case 6:
+          expect(prompt).toEqual('? Do you want me to run `npm install`? (y/N)');
           cli.stdin.write('n');
 
           // At this point the CLI will create directories and all that fun stuff
@@ -166,10 +154,7 @@ function getPromptChoices(prompt: string) {
     .map(s => s.trim());
 }
 
-function isSamePrompt(
-  currentPrompt: string,
-  previousPrompt: string | undefined
-) {
+function isSamePrompt(currentPrompt: string, previousPrompt: string | undefined) {
   if (previousPrompt === undefined) {
     return false;
   }

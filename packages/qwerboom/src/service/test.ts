@@ -2,10 +2,11 @@ import chalk from 'chalk';
 import fs = require('fs-extra');
 import path = require('path');
 
-import Context from '../core/Context';
 import log = require('../utils/log');
+import type { IJestResult } from '../core/Context';
+import type Context from '../core/Context';
 
-export = async function (context) {
+export = async function (context?: Context): Promise<IJestResult | undefined> {
   const { command, commandArgs } = context;
   const { jestArgv = {} } = commandArgs || {};
   const { config, regexForTestFiles, ...restArgv } = jestArgv;
@@ -99,6 +100,6 @@ export = async function (context) {
         });
     });
     await applyHook(`after.${command}`, { result });
-    return result;
+    return result as IJestResult;
   }
 };

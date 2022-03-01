@@ -1,11 +1,15 @@
 import chalk from 'chalk';
 import fs = require('fs-extra');
 import path = require('path');
+import type webpack from 'webpack';
 
 import webpackStats from '../utils/webpackStats';
 import log = require('../utils/log');
+import type { ITaskConfig } from '../core/Context';
+import type Context from '../core/Context';
+import type { IRunOptions } from '../types';
 
-export = async function (context, options?) {
+export = async function (context: Context, options?: IRunOptions): Promise<void | ITaskConfig[]> {
   const { eject } = options || {};
   const configArr = context.getWebpackConfig();
   const { command, commandArgs, applyHook, rootDir, webpack: webpackInstance } = context;
@@ -41,7 +45,7 @@ export = async function (context, options?) {
     config: webpackConfig
   });
 
-  let compiler;
+  let compiler: webpack.MultiCompiler;
   try {
     compiler = webpackInstance(webpackConfig);
   } catch (err) {

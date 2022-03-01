@@ -1,11 +1,18 @@
 import deepmerge = require('deepmerge');
 import chalk from 'chalk';
+import type { WebpackOptionsNormalized } from 'webpack';
+import type WebpackDevServer from 'webpack-dev-server';
 
 import log = require('../utils/log');
 import prepareURLs = require('../utils/prepareURLs');
 import webpackStats from '../utils/webpackStats';
+import type { ITaskConfig } from '../core/Context';
+import type Context from '../core/Context';
+import type { IRunOptions } from '../types';
 
-export = async function (context, options) {
+type DevServerConfig = Record<string, any>;
+
+export = async function (context: Context, options?: IRunOptions): Promise<void | ITaskConfig[] | WebpackDevServer> {
   const { eject } = options || {};
   const configArr = context.getWebpackConfig();
   const { command, commandArgs, webpack, applyHook } = context;
@@ -23,7 +30,7 @@ export = async function (context, options) {
   }
 
   let serverUrl = '';
-  let devServerConfig = {
+  let devServerConfig: DevServerConfig = {
     port: commandArgs.port || 3333,
     host: commandArgs.host || '0.0.0.0',
     https: commandArgs.https || false
@@ -31,7 +38,7 @@ export = async function (context, options) {
 
   for (const item of configArr) {
     const { chainConfig } = item;
-    const config = chainConfig.toConfig();
+    const config = chainConfig.toConfig() as WebpackOptionsNormalized;
     if (config.devServer) {
       devServerConfig = deepmerge(devServerConfig, config.devServer);
     }
@@ -78,7 +85,7 @@ export = async function (context, options) {
     });
   });
 
-  let devServer;
+  let devServer: WebpackDevServer;
   // require webpack-dev-server after context setup
   // context may hijack webpack resolve
   // eslint-disable-next-line @typescript-eslint/no-var-requires

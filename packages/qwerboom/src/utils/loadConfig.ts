@@ -1,15 +1,16 @@
 import fs from 'fs';
 import JSON5 = require('json5');
+import type { Logger } from 'npmlog';
 
 import buildConfig from './buildConfig';
 
-export default async function loadConfig(filePath, log) {
+export default async function loadConfig<T>(filePath: string, log: Logger): Promise<T | undefined> {
   const start = Date.now();
   const isJson = filePath.endsWith('.json');
   const isTS = filePath.endsWith('.ts');
   const isMjs = filePath.endsWith('.mjs');
 
-  let userConfig;
+  let userConfig: T | undefined;
 
   if (isJson) {
     return JSON5.parse(fs.readFileSync(filePath, 'utf8'));
@@ -27,17 +28,17 @@ export default async function loadConfig(filePath, log) {
       try {
         // eslint-disable-next-line no-eval
         userConfig = (await eval(`import(tempFile + '?t=${Date.now()}')`)).default;
-      } catch(err) {
+      } catch (err) {
         fs.unlinkSync(tempFile);
         throw err;
       }
       // delete the file after eval
       fs.unlinkSync(tempFile);
-      log.verbose('[config]',`TS + native esm module loaded in ${Date.now() - start}ms, ${fileUrl}`);
+      log.verbose('[config]', `TS + native esm module loaded in ${Date.now() - start}ms, ${fileUrl}`);
     } else {
       // eslint-disable-next-line no-eval
       userConfig = (await eval(`import(fileUrl + '?t=${Date.now()}')`)).default;
-      log.verbose('[config]',`native esm config loaded in ${Date.now() - start}ms, ${fileUrl}`);
+      log.verbose('[config]', `native esm config loaded in ${Date.now() - start}ms, ${fileUrl}`);
     }
   }
 
@@ -55,8 +56,8 @@ export default async function loadConfig(filePath, log) {
           // #1635, #2050 some Node 12.x versions don't have esm detection
           // so it throws normal syntax errors when encountering esm syntax
           `Unexpected token`,
-          `Unexpected identifier`,
-        ].join('|'),
+          `Unexpected identifier`
+        ].join('|')
       );
       if (!ignored.test(e.message)) {
         throw e;

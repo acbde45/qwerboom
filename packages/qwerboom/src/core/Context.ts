@@ -1,19 +1,35 @@
 import chalk from 'chalk';
-import path from 'path';
+import * as path from 'path';
 import fg from 'fast-glob';
-import fs from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import camelCase = require('camelcase');
 import deepmerge = require('deepmerge');
 import assert = require('assert');
+import type { MultiStats } from 'webpack';
+import type webpack from 'webpack';
+import type WebpackDevServer from 'webpack-dev-server';
+import type { Logger } from 'npmlog';
+import type WebpackChain = require('webpack-chain');
+import type { GlobalConfig } from '@jest/types/build/Config';
+import type { AggregatedResult } from '@jest/test-result';
 
 import hijackWebpackResolve from '../utils/hijackWebpack';
 import log from '../utils/log';
 import loadConfig from '../utils/loadConfig';
+import type { IHash, Json, JsonValue, MaybeArray, MaybePromise, JsonArray } from '../types';
 
 const PKG_FILE = 'package.json';
 const USER_CONFIG_FILE = ['build.json', 'build.config.(js|ts)'];
-const PLUGIN_CONTEXT_KEY = ['command', 'commandArgs', 'rootDir', 'userConfig', 'originalUserConfig', 'pkg', 'webpack'];
+const PLUGIN_CONTEXT_KEY = [
+  'command' as 'command',
+  'commandArgs' as 'commandArgs',
+  'rootDir' as 'rootDir',
+  'userConfig' as 'userConfig',
+  'originalUserConfig' as 'originalUserConfig',
+  'pkg' as 'pkg',
+  'webpack' as 'webpack'
+];
 
 const VALIDATION_MAP = {
   string: 'isString' as 'isString',
@@ -30,6 +46,235 @@ const BUILTIN_CLI_OPTIONS = [
   { name: 'config', commands: ['start', 'build', 'test'] }
 ];
 
+export type IWebpack = typeof webpack;
+
+export type PluginContext = Pick<Context, typeof PLUGIN_CONTEXT_KEY[number]>;
+
+export type UserConfigContext = PluginContext & {
+  taskName: string;
+};
+
+export type ValidationKey = keyof typeof VALIDATION_MAP;
+
+export interface IJestResult {
+  results: AggregatedResult;
+  globalConfig: GlobalConfig;
+}
+
+export interface IOnHookCallbackArg {
+  err?: Error;
+  args?: CommandArgs;
+  stats?: MultiStats;
+  url?: string;
+  devServer?: WebpackDevServer;
+  config?: any;
+  result?: IJestResult;
+}
+
+export interface IOnHookCallback {
+  (arg?: IOnHookCallbackArg): MaybePromise<void>;
+}
+
+export interface IOnHook {
+  (eventName: string, callback: IOnHookCallback): void;
+}
+
+export interface IPluginConfigWebpack {
+  (config: WebpackChain): Promise<void> | void;
+}
+
+export interface IUserConfigWebpack {
+  (config: WebpackChain, value: JsonValue, context: UserConfigContext): Promise<void> | void;
+}
+
+export interface IValidation {
+  (value: any): boolean;
+}
+
+export interface IUserConfigArgs {
+  name: string;
+  configWebpack?: IUserConfigWebpack;
+  defaultValue?: any;
+  validation?: ValidationKey | IValidation;
+  ignoreTasks?: string[];
+}
+
+export interface ICliOptionArgs {
+  name: string;
+  configWebpack?: IUserConfigWebpack;
+  commands?: string[];
+  ignoreTasks?: string[];
+}
+
+export interface IOnGetWebpackConfig {
+  (name: string, fn: IPluginConfigWebpack): void;
+  (fn: IPluginConfigWebpack): void;
+}
+
+export interface IOnGetJestConfig {
+  (fn: IJestConfigFunction): void;
+}
+
+export interface IRegisterTask {
+  (name: string, chainConfig: WebpackChain): void;
+}
+
+export interface ICancelTask {
+  (name: string): void;
+}
+
+export interface IMethodRegistration {
+  (args?: any): void;
+}
+
+export interface IMethodCurry {
+  (data?: any): IMethodRegistration;
+}
+
+export type IMethodFunction = IMethodRegistration | IMethodCurry;
+
+export interface IMethodOptions {
+  pluginName?: boolean;
+}
+
+export interface IRegisterMethod {
+  (name: string, fn: IMethodFunction, options?: IMethodOptions): void;
+}
+
+type IMethod = [string, string] | string;
+
+export interface IApplyMethod {
+  (config: IMethod, ...args: any[]): any;
+}
+
+export interface IApplyMethodAPI {
+  (name: string, ...args: any[]): any;
+}
+
+export interface IHasMethod {
+  (name: string): boolean;
+}
+
+export interface IModifyConfig {
+  (userConfig: IUserConfig): Omit<IUserConfig, 'plugins'>;
+}
+
+export interface IModifyUserConfig {
+  (configKey: string | IModifyConfig, value?: any, options?: { deepmerge: boolean }): void;
+}
+
+export interface IGetAllPlugin {
+  (dataKeys?: string[]): Partial<IPluginInfo>[];
+}
+
+export interface IPluginAPI {
+  log: Logger;
+  context: PluginContext;
+  registerTask: IRegisterTask;
+  getAllTask: () => string[];
+  getAllPlugin: IGetAllPlugin;
+  onGetWebpackConfig: IOnGetWebpackConfig;
+  onGetJestConfig: IOnGetJestConfig;
+  onHook: IOnHook;
+  setValue: <T>(name: string, value: T) => void;
+  getValue: <T>(name: string) => T;
+  registerUserConfig: (args: MaybeArray<IUserConfigArgs>) => void;
+  hasRegistration: (name: string, type?: 'cliOption' | 'userConfig') => boolean;
+  registerCliOption: (args: MaybeArray<ICliOptionArgs>) => void;
+  registerMethod: IRegisterMethod;
+  applyMethod: IApplyMethodAPI;
+  modifyUserConfig: IModifyUserConfig;
+}
+
+export interface IPluginInfo {
+  fn: IPlugin;
+  name?: string;
+  pluginPath?: string;
+  options: IPluginOptions;
+}
+
+export type IPluginOptions = Json | JsonArray;
+
+export interface IPlugin {
+  (api: IPluginAPI, options?: IPluginOptions): MaybePromise<void>;
+}
+
+export type CommandName = 'start' | 'build' | 'test';
+
+export type CommandArgs = IHash<any>;
+
+export type IPluginList = (string | [string, Json])[];
+
+export type IGetBuiltInPlugins = (userConfig: IUserConfig) => IPluginList;
+
+export type CommandModule<T> = (context: Context, options: any) => Promise<T>;
+
+export interface ICommandModules<T = any> {
+  [command: string]: CommandModule<T>;
+}
+
+export type RegisterCommandModules = (key: string, module: CommandModule<any>) => void;
+
+export interface IContextOptions {
+  command: CommandName;
+  rootDir: string;
+  args: CommandArgs;
+  plugins?: IPluginList;
+  getBuiltInPlugins?: IGetBuiltInPlugins;
+  commandModules?: ICommandModules;
+}
+
+export interface ITaskConfig {
+  name: string;
+  chainConfig: WebpackChain;
+  modifyFunctions: IPluginConfigWebpack[];
+}
+
+export interface IUserConfig extends Json {
+  plugins: IPluginList;
+}
+
+export interface IModeConfig {
+  [name: string]: IUserConfig;
+}
+
+export interface IJestConfigFunction {
+  (JestConfig: Json): Json;
+}
+
+export interface IModifyRegisteredConfigCallbacks<T> {
+  (configArgs: T): T;
+}
+
+export interface IUserConfigRegistration {
+  [key: string]: IUserConfigArgs;
+}
+
+export interface ICliOptionRegistration {
+  [key: string]: ICliOptionArgs;
+}
+
+export interface IModifyConfigRegistration {
+  (configFunc: IModifyRegisteredConfigCallbacks<IUserConfigRegistration>): void;
+  (configName: string, configFunc: IModifyRegisteredConfigCallbacks<IUserConfigArgs>): void;
+}
+
+export interface IModifyCliRegistration {
+  (configFunc: IModifyRegisteredConfigCallbacks<ICliOptionRegistration>): void;
+  (configName: string, configFunc: IModifyRegisteredConfigCallbacks<ICliOptionArgs>): void;
+}
+
+export type IModifyRegisteredConfigArgs =
+  | [string, IModifyRegisteredConfigCallbacks<IUserConfigArgs>]
+  | [IModifyRegisteredConfigCallbacks<IUserConfigRegistration>];
+export type IModifyRegisteredCliArgs =
+  | [string, IModifyRegisteredConfigCallbacks<ICliOptionArgs>]
+  | [IModifyRegisteredConfigCallbacks<ICliOptionRegistration>];
+
+export type IOnGetWebpackConfigArgs = [string, IPluginConfigWebpack] | [IPluginConfigWebpack];
+
+export type IRegistrationKey = 'modifyConfigRegistrationCallbacks' | 'modifyCliRegistrationCallbacks';
+
 const mergeConfig = <T>(currentValue: T, newValue: T): T => {
   // only merge when currentValue and newValue is object and array
   const isBothArray = Array.isArray(currentValue) && Array.isArray(newValue);
@@ -42,50 +287,52 @@ const mergeConfig = <T>(currentValue: T, newValue: T): T => {
 };
 
 class Context {
-  public command;
+  public command: CommandName;
 
-  public commandArgs;
+  public commandArgs: CommandArgs;
 
-  public commandModules = {};
+  public commandModules: ICommandModules = {};
 
-  public rootDir;
+  public rootDir: string;
 
-  public userConfig;
+  public userConfig: IUserConfig;
 
-  public webpack;
+  public originalUserConfig: IUserConfig;
 
-  public plugins;
+  public webpack: IWebpack;
 
-  public originalUserConfig;
+  public plugins: IPluginInfo[];
 
-  public pkg;
+  public pkg: Json;
 
-  private eventHooks = {}; // lifecycle functions
+  private eventHooks: {
+    [name: string]: IOnHookCallback[];
+  };
 
-  private options;
-
-  private methodRegistration;
+  private options: IContextOptions;
 
   // 通过registerTask注册，存放初始的webpack-chain配置
-  private configArr;
+  private configArr: ITaskConfig[];
 
-  private cancelTaskNames;
+  private cancelTaskNames: string[];
 
-  private modifyConfigFns;
+  private modifyConfigFns: IOnGetWebpackConfigArgs[];
 
-  private modifyJestConfig;
+  private modifyJestConfig: IJestConfigFunction[];
 
-  private modifyConfigRegistrationCallbacks;
+  private modifyConfigRegistrationCallbacks: IModifyRegisteredConfigArgs[];
 
-  private modifyCliRegistrationCallbacks;
+  private modifyCliRegistrationCallbacks: IModifyRegisteredConfigArgs[];
 
-  private internalValue;
+  private internalValue: IHash<any>;
 
-  private userConfigRegistration;
+  private userConfigRegistration: IUserConfigRegistration;
 
-  private cliOptionRegistration;
+  private cliOptionRegistration: ICliOptionRegistration;
 
-  constructor(options) {
+  private methodRegistration: { [name: string]: [IMethodFunction, any] };
+
+  constructor(options: IContextOptions) {
     const { command, rootDir = process.cwd(), args = {} } = options || {};
 
     this.options = options;
@@ -117,7 +364,7 @@ class Context {
     this.registerCliOption(BUILTIN_CLI_OPTIONS);
   }
 
-  private getProjectFile = (fileName: string) => {
+  private getProjectFile = (fileName: string): Json => {
     const configPath = path.resolve(this.rootDir, fileName);
 
     let config = {};
@@ -132,14 +379,14 @@ class Context {
     return config;
   };
 
-  public onHook = (key, fn) => {
+  public onHook: IOnHook = (key, fn) => {
     if (!Array.isArray(this.eventHooks[key])) {
       this.eventHooks[key] = [];
     }
     this.eventHooks[key].push(fn);
   };
 
-  public applyHook = async (key, opts) => {
+  public applyHook = async (key: string, opts = {}): Promise<void> => {
     const hooks = this.eventHooks[key] || [];
 
     for (const fn of hooks) {
@@ -162,9 +409,9 @@ class Context {
       log.warn('CONFIG', `command module ${moduleKey} already been registered`);
     }
     this.commandModules[moduleKey] = module;
-  };
+  }
 
-  public getUserConfig = async () => {
+  public getUserConfig = async (): Promise<IUserConfig> => {
     const { config } = this.commandArgs;
     let configPath = '';
     if (config) {
@@ -176,7 +423,7 @@ class Context {
       });
       configPath = defaultUserConfig;
     }
-    let userConfig = { plugins: [] };
+    let userConfig: IUserConfig = { plugins: [] };
 
     if (configPath && fs.existsSync(configPath)) {
       try {
@@ -194,7 +441,7 @@ class Context {
     return this.mergeModeConfig(userConfig);
   };
 
-  private mergeModeConfig = userConfig => {
+  private mergeModeConfig = (userConfig: IUserConfig): IUserConfig => {
     const { mode } = this.commandArgs;
     // modify userConfig by userConfig.modeConfig
 
@@ -244,7 +491,7 @@ class Context {
     this.plugins = this.resolvePlugins(builtInPlugins);
   };
 
-  private checkPluginValue = (plugins): void => {
+  private checkPluginValue = (plugins: IPluginList): void => {
     let flag;
     if (!_.isArray(plugins)) {
       flag = false;
@@ -264,16 +511,16 @@ class Context {
     }
   };
 
-  private resolvePlugins = builtInPlugins => {
-    const userPlugins = [...builtInPlugins, ...(this.userConfig.plugins || [])].map(pluginInfo => {
+  private resolvePlugins = (builtInPlugins: IPluginList): IPluginInfo[] => {
+    const userPlugins = [...builtInPlugins, ...(this.userConfig.plugins || [])].map((pluginInfo): IPluginInfo => {
       let fn;
       if (_.isFunction(pluginInfo)) {
         return {
-          fn: pluginInfo,
+          fn: pluginInfo as unknown as IPlugin,
           options: {}
         };
       }
-      const plugins = Array.isArray(pluginInfo) ? pluginInfo : [pluginInfo, undefined];
+      const plugins: [string, IPluginOptions] = Array.isArray(pluginInfo) ? pluginInfo : [pluginInfo, undefined];
       const pluginResolveDir = process.env.EXTRA_PLUGIN_DIR
         ? [process.env.EXTRA_PLUGIN_DIR, this.rootDir]
         : [this.rootDir];
@@ -301,7 +548,7 @@ class Context {
     return userPlugins;
   };
 
-  public registerTask = (name, chainConfig) => {
+  public registerTask: IRegisterTask = (name, chainConfig) => {
     const exist = this.configArr.find((v): boolean => v.name === name);
     if (!exist) {
       this.configArr.push({
@@ -314,7 +561,7 @@ class Context {
     }
   };
 
-  public cancelTask = name => {
+  public cancelTask: ICancelTask = name => {
     if (this.cancelTaskNames.includes(name)) {
       log.info('TASK', `task ${name} has already been canceled`);
     } else {
@@ -326,47 +573,55 @@ class Context {
     return this.configArr.map(v => v.name);
   };
 
-  public getAllPlugin = (dataKeys = ['pluginPath', 'options', 'name']) => {
-    return this.plugins.map(pluginInfo => {
+  public getAllPlugin: IGetAllPlugin = (dataKeys = ['pluginPath', 'options', 'name']) => {
+    return this.plugins.map((pluginInfo): Partial<IPluginInfo> => {
       // filter fn to avoid loop
       return _.pick(pluginInfo, dataKeys);
     });
   };
 
-  public registerMethod = (name, fn, options) => {
+  public registerMethod: IRegisterMethod = (name, fn, options) => {
     if (this.methodRegistration[name]) {
       throw new Error(`[Error] method '${name}' already registered`);
     } else {
-      const registration = [fn, options];
+      const registration = [fn, options] as [IMethodFunction, IMethodOptions];
       this.methodRegistration[name] = registration;
     }
   };
 
-  public hasMethod = name => {
+  public hasMethod: IHasMethod = name => {
     return !!this.methodRegistration[name];
   };
 
-  public applyMethod = (config, ...args) => {
+  public applyMethod: IApplyMethod = (config, ...args) => {
     const [methodName, pluginName] = Array.isArray(config) ? config : [config];
-    console.log(methodName, pluginName);
+
     if (this.methodRegistration[methodName]) {
       const [registerMethod, methodOptions] = this.methodRegistration[methodName];
       if (methodOptions?.pluginName) {
-        return registerMethod(pluginName)(...args);
+        return (registerMethod as IMethodCurry)(pluginName)(...args);
       } else {
-        return registerMethod(...args);
+        return (registerMethod as IMethodRegistration)(...args);
       }
     } else {
       throw new Error(`apply unknown method ${methodName}`);
     }
   };
 
-  public onGetWebpackConfig = (...args) => {
+  public onGetWebpackConfig: IOnGetWebpackConfig = (...args: IOnGetWebpackConfigArgs) => {
     this.modifyConfigFns.push(args);
   };
 
-  public onGetJestConfig = fn => {
+  public onGetJestConfig: IOnGetJestConfig = (fn: IJestConfigFunction) => {
     this.modifyJestConfig.push(fn);
+  };
+
+  public runJestConfig = (jestConfig: Json): Json => {
+    let result = jestConfig;
+    for (const fn of this.modifyJestConfig) {
+      result = fn(result);
+    }
+    return result;
   };
 
   public setValue = (key: string | number, value: any): void => {
@@ -377,7 +632,7 @@ class Context {
     return this.internalValue[key];
   };
 
-  public registerUserConfig = (args): void => {
+  public registerUserConfig = (args: MaybeArray<IUserConfigArgs>): void => {
     this.registerConfig('userConfig', args);
   };
 
@@ -386,19 +641,23 @@ class Context {
     return Object.keys(this[mappedType] || {}).includes(name);
   };
 
-  public registerCliOption = (args): void => {
+  public registerCliOption = (args: MaybeArray<ICliOptionArgs>): void => {
     this.registerConfig('cliOption', args, name => {
       return camelCase(name, { pascalCase: false });
     });
   };
 
-  private registerConfig = (type: string, args, parseName?: (name: string) => string): void => {
+  private registerConfig = (
+    type: string,
+    args: MaybeArray<IUserConfigArgs> | MaybeArray<ICliOptionArgs>,
+    parseName?: (name: string) => string
+  ): void => {
     const registerKey = `${type}Registration` as 'userConfigRegistration' | 'cliOptionRegistration';
     if (!this[registerKey]) {
       throw new Error(`unknown register type: ${type}, use available types (userConfig or cliOption) instead`);
     }
     const configArr = _.isArray(args) ? args : [args];
-    configArr.forEach((conf): void => {
+    (configArr as Array<IUserConfigArgs | ICliOptionArgs>).forEach((conf): void => {
       const confName = parseName ? parseName(conf.name) : conf.name;
       if (this[registerKey][confName]) {
         throw new Error(`${conf.name} already registered in ${type}`);
@@ -412,12 +671,12 @@ class Context {
         _.isUndefined(this.userConfig[confName]) &&
         Object.prototype.hasOwnProperty.call(conf, 'defaultValue')
       ) {
-        this.userConfig[confName] = conf.defaultValue;
+        this.userConfig[confName] = (conf as IUserConfigArgs).defaultValue;
       }
     });
   };
 
-  public modifyUserConfig = (configKey, value, options) => {
+  public modifyUserConfig: IModifyUserConfig = (configKey, value, options) => {
     const errorMsg = 'config plugins is not support to be modified';
     const { deepmerge: mergeInDeep } = options || {};
     if (typeof configKey === 'string') {
@@ -448,15 +707,15 @@ class Context {
     }
   };
 
-  public modifyConfigRegistration = (...args) => {
+  public modifyConfigRegistration: IModifyConfigRegistration = (...args: IModifyRegisteredConfigArgs) => {
     this.modifyConfigRegistrationCallbacks.push(args);
   };
 
-  public modifyCliRegistration = (...args) => {
+  public modifyCliRegistration: IModifyCliRegistration = (...args: IModifyRegisteredCliArgs) => {
     this.modifyCliRegistrationCallbacks.push(args);
   };
 
-  private runPlugins = async () => {
+  private runPlugins = async (): Promise<void> => {
     for (const pluginInfo of this.plugins) {
       const { fn, options, name: pluginName } = pluginInfo;
 
@@ -541,7 +800,7 @@ class Context {
           let validationInfo;
           if (_.isString(validation)) {
             // split validation string
-            const supportTypes = validation.split('|');
+            const supportTypes = (validation as string).split('|');
             const validateResult = supportTypes.some(supportType => {
               const fnName = VALIDATION_MAP[supportType];
               if (!fnName) {
@@ -552,7 +811,7 @@ class Context {
             assert(validateResult, `Config ${name} should be ${validation}, but got ${configValue}`);
           } else {
             // eslint-disable-next-line no-await-in-loop
-            validationInfo = await validation(configValue);
+            validationInfo = await (validation as Function)(configValue);
             assert(validationInfo, `${name} did not pass validation, result: ${validationInfo}`);
           }
         }
@@ -565,7 +824,11 @@ class Context {
     }
   };
 
-  private runConfigWebpack = async (fn, configValue, ignoreTasks: string[] | null): Promise<void> => {
+  private runConfigWebpack = async (
+    fn: IUserConfigWebpack,
+    configValue: JsonValue,
+    ignoreTasks: string[] | null
+  ): Promise<void> => {
     for (const webpackConfigInfo of this.configArr) {
       const taskName = webpackConfigInfo.name;
       let ignoreConfig = false;
@@ -589,7 +852,7 @@ class Context {
       if (isAll) {
         // modify all
         this.configArr.forEach(config => {
-          config.modifyFunctions.push(name);
+          config.modifyFunctions.push(name as IPluginConfigWebpack);
         });
       } else {
         // modify named config
@@ -635,13 +898,13 @@ class Context {
     // filter webpack config by cancelTaskNames
     this.configArr = this.configArr.filter(config => !this.cancelTaskNames.includes(config.name));
     return this.configArr;
-  }
+  };
 
-  public getWebpackConfig = () => {
+  public getWebpackConfig = (): ITaskConfig[] => {
     return this.configArr;
   };
 
-  public run = async (options) => {
+  public run = async <T, P>(options?: T): Promise<P> => {
     const { command, commandArgs } = this;
     log.verbose('OPTIONS', `${command} cliOptions: ${JSON.stringify(commandArgs, null, 2)}`);
     try {
@@ -657,7 +920,7 @@ class Context {
       userConfig: this.userConfig
     });
     return commandModule(this, options);
-  }
+  };
 }
 
 export default Context;

@@ -1,39 +1,31 @@
 import Module = require('module');
 
-export default function hijackWebpackResolve(webpack, rootDir: string): void {
+interface IOptions {
+  paths: string[];
+}
+
+export default function hijackWebpackResolve(webpack: any, rootDir: string): void {
   const webpackRegex = /^webpack\//;
   // eslint-disable-next-line no-underscore-dangle
   const originalResolver = (Module as any)._resolveFilename;
 
   // eslint-disable-next-line no-underscore-dangle
-  (Module as any)._resolveFilename = function(
-    request: string,
-    parent: string,
-    isMain: boolean,
-    options,
-  ): void {
+  (Module as any)._resolveFilename = function (request: string, parent: string, isMain: boolean, options): void {
     if (request.match(webpackRegex)) {
-      const newOptions = { paths: [] };
+      const newOptions: IOptions = { paths: [] };
       if (options?.paths) {
-        newOptions.paths = options.paths?.includes(rootDir)
-          ? options.paths
-          : options.paths?.concat(rootDir);
+        newOptions.paths = options.paths?.includes(rootDir) ? options.paths : options.paths?.concat(rootDir);
       } else {
         newOptions.paths.push(rootDir);
       }
-      return originalResolver.apply(this, [
-        request,
-        parent,
-        isMain,
-        newOptions,
-      ]);
+      return originalResolver.apply(this, [request, parent, isMain, newOptions]);
     }
     return originalResolver.apply(this, [request, parent, isMain, options]);
   };
   // eslint-disable-next-line no-underscore-dangle
   const originalLoader = (Module as any)._load;
   // eslint-disable-next-line no-underscore-dangle
-  (Module as any)._load = function(request: string, parent: object) {
+  (Module as any)._load = function (request: string, parent: object) {
     let moduleRequest = request;
     // ignore case which pass parent
     if (parent) {
@@ -50,4 +42,3 @@ export default function hijackWebpackResolve(webpack, rootDir: string): void {
     return originalLoader.apply(this, [moduleRequest, parent]);
   };
 }
-

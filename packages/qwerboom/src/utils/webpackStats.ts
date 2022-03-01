@@ -1,7 +1,26 @@
 import chalk from 'chalk';
+import type { MultiStats, Stats } from 'webpack';
 
 import formatWebpackMessages from './formatWebpackMessages';
 import log = require('./log');
+
+interface IUrls {
+  lanUrlForTerminal: string;
+  lanUrlForBrowser: string;
+  localUrlForTerminal: string;
+  localUrlForBrowser: string;
+}
+
+interface IWebpackStatsParams {
+  stats: Stats | MultiStats;
+  statsOptions?: Record<string, string>;
+  urls?: IUrls;
+  isFirstCompile?: boolean;
+}
+
+interface IWebpackStats {
+  (options: IWebpackStatsParams): boolean;
+}
 
 const defaultOptions = {
   // errors and warings will be logout by formatWebpackMessages
@@ -14,7 +33,7 @@ const defaultOptions = {
   modules: false
 };
 
-const webpackStats = ({ urls, stats, statsOptions = defaultOptions, isFirstCompile }) => {
+const webpackStats: IWebpackStats = ({ urls, stats, statsOptions = defaultOptions, isFirstCompile }) => {
   const statsJson = stats.toJson({
     all: false,
     errors: true,

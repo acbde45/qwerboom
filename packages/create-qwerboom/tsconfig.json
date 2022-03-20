@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "exclude": ["bin", "__tests__", "templates"],
-  "compilerOptions": {
-    "baseUrl": "./",
-    "rootDir": "src",
-    "outDir": "lib"
-  }
-}

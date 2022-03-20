@@ -1,6 +1,0 @@
-**/build/
-**/tests/__snapshots/
-**/node_modules/
-**/templates/
-**/packages/*/lib/**
-!.eslintrc.js

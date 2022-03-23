@@ -1,0 +1,15 @@
+{
+  "name": "@qwerboom/runtime",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "package.json"
+  ],
+  "dependencies": {
+    "@qwerboom/core": "*",
+    "history-with-query": "^4.10.4",
+    "mockjs": "^1.1.0",
+    "vite-plugin-mock": "^2.4.2"
+  }
+}

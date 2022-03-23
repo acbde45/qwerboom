@@ -1,4 +1,8 @@
-# 参考 https://github.com/github/gitignore/blob/main/Node.gitignore
+# ref: https://github.com/github/gitignore/blob/main/Node.gitignore
+
+# 编译后的文件
+packages/*/lib
+
 # Logs
 logs
 *.log

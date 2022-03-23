@@ -1,0 +1,19 @@
+{
+  "name": "@qwerboom/core",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "dependencies": {
+    "@types/stringify-object": "^4.0.1",
+    "mkdirp": "^1.0.4",
+    "stringify-object": "^4.0.1",
+    "vue": "^3.2.25"
+  },
+  "devDependencies": {
+    "@qwerboom/utils": "workspace:*",
+    "@types/mkdirp": "^1.0.1"
+  }
+}

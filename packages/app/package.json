@@ -1,0 +1,24 @@
+{
+  "name": "@qwerboom/app",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "package.json"
+  ],
+  "dependencies": {
+    "@qwerboom/core": "workspace:*",
+    "@qwerboom/utils": "workspace:*",
+    "@qwerboom/runtime": "workspace:*",
+    "mockjs": "^1.1.0",
+    "mustache": "^4.1.0",
+    "vite-plugin-mock": "^2.4.2",
+    "vue": "^3.2.25"
+  },
+  "devDependencies": {
+    "@types/mustache": "^4.1.1"
+  },
+  "peerDependencies": {
+    "vue": "3.x"
+  }
+}
